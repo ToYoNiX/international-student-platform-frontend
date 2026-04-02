@@ -10,7 +10,7 @@ import { FloatingSocialBar } from './components/FloatingSocialBar';
 import { LinksBar } from './components/LinksBar';
 // Pages
 import { Dashboard } from './pages/Dashboard';
-import { Academics } from './pages/Academics';
+import {Academics} from "./pages/Accademics/Academics.tsx";
 import Questionnaires from './pages/Questionnaires';
 import { Resources } from './pages/Resources';
 import { Announcements } from './pages/Announcements';
