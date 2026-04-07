@@ -32,13 +32,36 @@ interface ContentBlockProps {
 function ContentBlock({ block }: ContentBlockProps) {
   const safeContent = block.type === 'rich-text' ? sanitizeHtml(block.content) : '';
   const looksLikeHtml = block.type === 'rich-text' ? /<\/?[a-z][\s\S]*>/i.test(safeContent) : false;
+  const markdownComponents = {
+    h1: (props: any) => <h1 className="text-3xl md:text-4xl font-bold mt-8 mb-4 text-gray-900 dark:text-white" {...props} />,
+    h2: (props: any) => <h2 className="text-2xl md:text-3xl font-bold mt-7 mb-3 text-gray-900 dark:text-white" {...props} />,
+    h3: (props: any) => <h3 className="text-xl md:text-2xl font-semibold mt-6 mb-3 text-gray-900 dark:text-white" {...props} />,
+    p: (props: any) => <p className="text-base md:text-lg leading-8 mb-4 text-gray-800 dark:text-gray-200" {...props} />,
+    ul: (props: any) => <ul className="list-disc pl-6 mb-4 space-y-2 text-base md:text-lg text-gray-800 dark:text-gray-200" {...props} />,
+    ol: (props: any) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-base md:text-lg text-gray-800 dark:text-gray-200" {...props} />,
+    li: (props: any) => <li className="leading-7" {...props} />,
+    a: (props: any) => <a className="text-green-700 dark:text-green-400 underline hover:opacity-80" {...props} />,
+    table: ({ children }: any) => (
+      <div className="my-6 overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700">
+        <table className="min-w-full text-left text-sm md:text-base">{children}</table>
+      </div>
+    ),
+    thead: (props: any) => <thead className="bg-gray-100 dark:bg-slate-800" {...props} />,
+    tbody: (props: any) => <tbody className="bg-white dark:bg-slate-900" {...props} />,
+    tr: (props: any) => <tr className="border-b border-gray-200 dark:border-slate-700" {...props} />,
+    th: (props: any) => <th className="px-4 py-3 font-semibold text-gray-900 dark:text-white" {...props} />,
+    td: (props: any) => <td className="px-4 py-3 text-gray-800 dark:text-gray-200" {...props} />,
+    blockquote: (props: any) => <blockquote className="border-l-4 border-green-500 pl-4 my-5 italic text-gray-700 dark:text-gray-300" {...props} />,
+    pre: (props: any) => <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4" {...props} />,
+    code: (props: any) => <code className="bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm" {...props} />,
+  };
 
   switch (block.type) {
     case 'rich-text':
       if (looksLikeHtml) {
         return (
           <div
-            className="prose prose-sm md:prose-base max-w-none dark:prose-invert"
+            className="prose prose-base md:prose-lg max-w-none dark:prose-invert"
             dangerouslySetInnerHTML={{
               __html: safeContent
             }}
@@ -47,8 +70,8 @@ function ContentBlock({ block }: ContentBlockProps) {
       }
 
       return (
-        <div className="prose prose-sm md:prose-base max-w-none dark:prose-invert">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <div className="max-w-none">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
             {safeContent}
           </ReactMarkdown>
         </div>
