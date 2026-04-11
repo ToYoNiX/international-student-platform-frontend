@@ -28,64 +28,69 @@ export interface StrapiCollectionResponse<T> {
 /**
  * Block types for dynamic content rendering
  */
+export type PageAccessRole = 'public' | 'visitor' | 'college-member';
+
+export interface CmsMediaFile {
+  id?: number;
+  url: string;
+  alternativeText?: string;
+  caption?: string;
+  name?: string;
+  mime?: string;
+  ext?: string;
+  width?: number;
+  height?: number;
+  size?: number;
+}
+
 export interface RichTextBlock {
-  type: 'rich-text';
-  content: string;
+  __component: 'shared.rich-text';
+  body: string;
   anchor?: string;
 }
 
 export interface QuoteBlock {
-  type: 'quote';
-  quote: string;
-  author?: string;
+  __component: 'shared.quote';
+  title: string;
+  body: string;
   anchor?: string;
 }
 
 export interface MediaBlock {
-  type: 'media';
-  url: string;
-  alt?: string;
-  caption?: string;
+  __component: 'shared.media';
+  file: CmsMediaFile | null;
   anchor?: string;
 }
 
 export interface SliderBlock {
-  type: 'slider';
-  slides: {
-    image: string;
-    title?: string;
-    description?: string;
-  }[];
+  __component: 'shared.slider';
+  files: CmsMediaFile[];
   anchor?: string;
 }
 
 export type ContentBlock = RichTextBlock | QuoteBlock | MediaBlock | SliderBlock;
 
-/**
- * Homepage single-type
- */
-export interface Homepage {
+export interface CmsPageSeo {
+  [key: string]: unknown;
+}
+
+export interface CmsPage {
   id: number;
-  slug?: string;
   title?: string;
+  slug?: string;
   subtitle?: string;
-  description?: string;
+  accessRole?: PageAccessRole;
+  seo?: CmsPageSeo | null;
   blocks?: ContentBlock[];
-  featured_image?: {
-    data?: {
-      id: number;
-      attributes: {
-        url: string;
-        alt?: string;
-      };
-    };
-  };
+  description?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
+export type Homepage = CmsPage;
+
 /**
- * Academics single-type
+ * Homepage single-type
  */
 export interface Academics {
   id: number;

@@ -4,6 +4,7 @@
  */
 
 import { ContentBlock as ContentBlockType } from '../types/strapi';
+import { getStrapiMediaUrl } from '../services/cmsApi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -32,8 +33,9 @@ interface ContentBlockProps {
 }
 
 function ContentBlock({ block }: ContentBlockProps) {
-  const safeContent = block.type === 'rich-text' ? sanitizeHtml(block.content) : '';
-  const looksLikeHtml = block.type === 'rich-text' ? /<\/?[a-z][\s\S]*>/i.test(safeContent) : false;
+  const component = block.__component;
+  const safeContent = component === 'shared.rich-text' ? sanitizeHtml(block.body) : '';
+  const looksLikeHtml = component === 'shared.rich-text' ? /<\/?[a-z][\s\S]*>/i.test(safeContent) : false;
   const renderHeading = (Tag: 'h1' | 'h2' | 'h3', className: string) => {
     return ({ children, ...props }: any) => {
       const text = getTextContent(children);
@@ -67,8 +69,8 @@ function ContentBlock({ block }: ContentBlockProps) {
     code: (props: any) => <code className="bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm" {...props} />,
   };
 
-  switch (block.type) {
-    case 'rich-text':
+  switch (component) {
+    case 'shared.rich-text':
       if (looksLikeHtml) {
         return (
           <div
@@ -88,57 +90,98 @@ function ContentBlock({ block }: ContentBlockProps) {
         </div>
       );
     
-    case 'quote':
+    case 'shared.quote':
       return (
-        <blockquote className="border-l-4 border-green-500 pl-4 italic text-gray-700 dark:text-gray-300 my-4">
-          <p className="text-lg mb-2">"{block.quote}"</p>
-          {block.author && <p className="text-sm text-gray-600 dark:text-gray-400">— {block.author}</p>}
-        </blockquote>
-      );
-    
-    case 'media':
-      return (
-        <figure className="my-6">
-          <img
-            src={block.url}
-            alt={block.alt || 'Content image'}
-            className="w-full max-h-96 object-cover rounded-lg"
-          />
-          {block.caption && (
-            <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
-              {block.caption}
-            </figcaption>
-          )}
+        <figure className="border-l-4 border-green-500 pl-4 my-4">
+          {block.title && <figcaption className="text-sm font-semibold uppercase tracking-wide text-green-700 dark:text-green-400 mb-2">{block.title}</figcaption>}
+          <blockquote className="italic text-gray-700 dark:text-gray-300">
+            <p className="text-lg mb-2">{block.body}</p>
+          </blockquote>
         </figure>
       );
     
-    case 'slider':
+    case 'shared.media': {
+      const file = block.file;
+
+      if (!file?.url) {
+        return null;
+      }
+
+      const mediaUrl = getStrapiMediaUrl(file.url);
+      const mediaAlt = file.alternativeText || file.name || 'Content media';
+
+      if (file.mime?.startsWith('video/')) {
+        return (
+          <figure className="my-6">
+            <video controls className="w-full max-h-[32rem] rounded-lg bg-black">
+              <source src={mediaUrl} type={file.mime} />
+              Your browser does not support the video tag.
+            </video>
+            {file.caption && (
+              <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+                {file.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
+
+      if (file.mime?.startsWith('image/') || !file.mime) {
+        return (
+          <figure className="my-6">
+            <img
+              src={mediaUrl}
+              alt={mediaAlt}
+              className="w-full max-h-96 object-cover rounded-lg"
+            />
+            {file.caption && (
+              <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+                {file.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
+
       return (
-        <div className="my-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {block.slides.map((slide, idx) => (
-              <div key={idx} className="rounded-lg overflow-hidden shadow-md">
+        <div className="my-6 rounded-lg border border-gray-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-900">
+          <a
+            href={mediaUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-green-700 dark:text-green-400 underline hover:opacity-80"
+          >
+            Download {mediaAlt}
+          </a>
+          {file.caption && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{file.caption}</p>
+          )}
+        </div>
+      );
+    }
+
+    case 'shared.slider':
+      return (
+        <figure className="my-6 mx-auto max-w-6xl px-2">
+          <div className="flex flex-wrap justify-center gap-4">
+            {block.files.map((file, idx) => (
+              <div key={idx} className="w-full max-w-md overflow-hidden rounded-lg shadow-md">
                 <img
-                  src={slide.image}
-                  alt={slide.title || `Slide ${idx + 1}`}
+                  src={getStrapiMediaUrl(file.url)}
+                  alt={file.alternativeText || file.name || `Slide ${idx + 1}`}
                   className="w-full h-48 object-cover"
                 />
-                {slide.title && (
+                {file.caption && (
                   <div className="p-3 bg-white dark:bg-slate-800">
-                    <h4 className="font-semibold text-gray-900 dark:text-white">
-                      {slide.title}
-                    </h4>
-                    {slide.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {slide.description}
-                      </p>
-                    )}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {file.caption}
+                    </p>
                   </div>
                 )}
               </div>
             ))}
           </div>
-        </div>
+        </figure>
       );
     
     default:

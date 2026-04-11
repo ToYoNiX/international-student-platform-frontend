@@ -23,6 +23,8 @@ const formatMessageTime = (timestamp: string) =>
 
 const sortMessages = (messages: ChatThreadMessage[]) => [...messages].sort((left, right) => left.createdAt.localeCompare(right.createdAt));
 
+const getCurrentUserRole = (user: ReturnType<typeof useAuth>['user']) => (user?.role?.type === 'admin' ? 'admin' : 'user');
+
 const MessageBubble = ({ message, isMine, onRetry }: { message: ChatThreadMessage; isMine: boolean; onRetry: (messageId: string) => void }) => {
   const bubbleStyles = isMine
     ? 'bg-secondary text-white rounded-br-md'
@@ -65,6 +67,7 @@ export function ChatPanel() {
   const [conversationQuery, setConversationQuery] = useState('');
   const [adminQuery, setAdminQuery] = useState('');
   const { user } = useAuth();
+  const currentUserRole = getCurrentUserRole(user);
   const {
     isOpen,
     conversations,
@@ -449,7 +452,7 @@ export function ChatPanel() {
                           <MessageBubble
                             key={message.id}
                             message={message}
-                            isMine={message.sender.id === user?.id}
+                            isMine={message.senderType === currentUserRole}
                             onRetry={(messageId) => void retryMessage(messageId)}
                           />
                         ))}

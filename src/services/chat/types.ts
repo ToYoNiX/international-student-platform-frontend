@@ -2,6 +2,7 @@ export interface ChatParticipant {
   id: number;
   displayName: string;
   avatarUrl: string | null;
+  role?: 'user' | 'admin';
 }
 
 export interface ChatAdmin extends ChatParticipant {
@@ -29,6 +30,7 @@ export type ChatMessageStatus = 'sent' | 'sending' | 'failed';
 export interface ChatMessage {
   id: string;
   conversationId: string;
+  senderType: 'user' | 'admin';
   text: string;
   sender: ChatParticipant;
   status: ChatMessageStatus;
@@ -84,6 +86,7 @@ export interface ChatProviderCurrentUser {
   id: number;
   displayName: string;
   avatarUrl: string | null;
+  role?: 'user' | 'admin';
 }
 
 export interface ChatThreadMessage extends ChatMessage {

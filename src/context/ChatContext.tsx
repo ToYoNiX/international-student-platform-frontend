@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { ROLES } from '../constants/roles';
 import { createChatProvider, type ChatAdmin, type ChatConversation, type ChatCreateConversationPayload, type ChatMessage, type ChatProviderCurrentUser, type ChatThreadMessage } from '../services/chat';
 
 interface ChatContextValue {
@@ -34,6 +35,7 @@ const currentUserParticipant = (user: ReturnType<typeof useAuth>['user']) => ({
   id: user?.id ?? 0,
   displayName: user?.displayName || user?.username || 'You',
   avatarUrl: user?.avatar?.url ?? null,
+  role: (user?.role?.type === ROLES.ADMIN ? 'admin' : 'user') as 'user' | 'admin',
 });
 
 const generateClientMessageId = () => {

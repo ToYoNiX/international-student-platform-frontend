@@ -14,7 +14,7 @@ export const getChatProviderMode = (): ChatProviderMode => {
 };
 
 export const createChatProvider = (currentUser?: ChatProviderCurrentUser): ChatProvider => {
-  return getChatProviderMode() === 'api' ? createApiChatProvider() : createMockChatProvider(currentUser);
+  return getChatProviderMode() === 'api' ? createApiChatProvider(currentUser) : createMockChatProvider(currentUser);
 };
 
 export * from './types';

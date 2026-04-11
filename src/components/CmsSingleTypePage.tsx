@@ -1,16 +1,11 @@
 import { AlertCircle, Loader } from 'lucide-react';
 import { ContentBlocks } from './ContentBlocks';
 import { useCmsData } from '../hooks/useCmsData';
-import { ContentBlock } from '../types/strapi';
+import { CmsPage } from '../types/strapi';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-interface CmsSingleTypePageData {
-  id?: number;
-  title?: string;
-  subtitle?: string;
-  blocks?: ContentBlock[];
-}
+interface CmsSingleTypePageData extends Pick<CmsPage, 'id' | 'title' | 'slug' | 'subtitle' | 'accessRole' | 'seo' | 'blocks'> {}
 
 interface CmsSingleTypePageProps<T extends CmsSingleTypePageData> {
   fetcher: () => Promise<T>;

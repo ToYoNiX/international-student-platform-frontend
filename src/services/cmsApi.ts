@@ -3,7 +3,7 @@
  * Provides fetch functions for all page content
  */
 
-import { apiRequest, ApiRequestOptions } from './api';
+import { apiRequest } from './api';
 import { 
   Homepage, 
   Academics, 
@@ -11,6 +11,7 @@ import {
   Resources, 
   Announcements, 
   ContactUs,
+  CmsMediaFile,
   StrapiCollectionResponse,
   StrapiSingleTypeResponse 
 } from '../types/strapi';
@@ -27,26 +28,90 @@ const CMS_API_ENDPOINTS = {
 
 /** Default populate query to fetch all relations */
 const DEFAULT_POPULATE = 'populate=*';
+const PAGE_POPULATE = [
+  'populate[blocks][on][shared.rich-text][populate]=*',
+  'populate[blocks][on][shared.quote][populate]=*',
+  'populate[blocks][on][shared.media][populate]=*',
+  'populate[blocks][on][shared.slider][populate]=*',
+].join('&');
 
 type CmsBlock = {
+  __component?: string;
   type?: string;
   content?: string;
-  __component?: string;
   body?: string;
+  title?: string;
   quote?: string;
   author?: string;
   anchor?: string;
-  media?: {
-    url?: string;
-    alternativeText?: string;
-    caption?: string;
-  };
-  slides?: Array<{
-    image?: string;
-    title?: string;
-    description?: string;
-  }>;
+  file?: unknown;
+  media?: unknown;
+  files?: unknown;
+  slides?: unknown;
 };
+
+function unwrapRelationData(value: unknown): any {
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  const maybeData = (value as any).data;
+  if (maybeData && typeof maybeData === 'object') {
+    return unwrapRelationData(maybeData);
+  }
+
+  const maybeAttributes = (value as any).attributes;
+  if (maybeAttributes && typeof maybeAttributes === 'object') {
+    return {
+      ...(value as any),
+      ...maybeAttributes,
+    };
+  }
+
+  return value;
+}
+
+function normalizeMediaFile(file: unknown): CmsMediaFile | null {
+  const media = unwrapRelationData(file);
+
+  if (!media || typeof media !== 'object') {
+    return null;
+  }
+
+  const mediaObject = media as any;
+  const url = mediaObject.url || mediaObject?.attributes?.url;
+
+  if (!url || typeof url !== 'string') {
+    return null;
+  }
+
+  const attributes = mediaObject.attributes && typeof mediaObject.attributes === 'object'
+    ? mediaObject.attributes
+    : {};
+
+  return {
+    id: typeof mediaObject.id === 'number' ? mediaObject.id : undefined,
+    url,
+    alternativeText: mediaObject.alternativeText ?? attributes.alternativeText,
+    caption: mediaObject.caption ?? attributes.caption,
+    name: mediaObject.name ?? attributes.name,
+    mime: mediaObject.mime ?? attributes.mime,
+    ext: mediaObject.ext ?? attributes.ext,
+    width: mediaObject.width ?? attributes.width,
+    height: mediaObject.height ?? attributes.height,
+    size: mediaObject.size ?? attributes.size,
+  };
+}
+
+function normalizeMediaFiles(files: unknown): CmsMediaFile[] {
+  const rawFiles: unknown[] = Array.isArray(files)
+    ? files
+    : Array.isArray((files as any)?.data)
+      ? (files as any).data
+      : [];
+
+  return rawFiles.map((file) => normalizeMediaFile(file)).filter((file): file is CmsMediaFile => file !== null);
+}
 
 function normalizeBlocks(blocks: unknown): Homepage['blocks'] {
   if (!Array.isArray(blocks)) {
@@ -55,86 +120,62 @@ function normalizeBlocks(blocks: unknown): Homepage['blocks'] {
 
   return (blocks as CmsBlock[])
     .map((block) => {
-      if (block.type === 'rich-text' && block.content) {
-        return {
-          type: 'rich-text' as const,
-          content: block.content,
-          anchor: block.anchor,
-        };
-      }
-
-      if (block.type === 'quote' && block.quote) {
-        return {
-          type: 'quote' as const,
-          quote: block.quote,
-          author: block.author,
-          anchor: block.anchor,
-        };
-      }
-
-      if (block.type === 'media' && block.media?.url) {
-        return {
-          type: 'media' as const,
-          url: block.media.url,
-          alt: block.media.alternativeText,
-          caption: block.media.caption,
-          anchor: block.anchor,
-        };
-      }
-
-      if (block.type === 'slider' && Array.isArray(block.slides)) {
-        return {
-          type: 'slider' as const,
-          slides: block.slides
-            .filter((slide) => !!slide.image)
-            .map((slide) => ({
-              image: slide.image as string,
-              title: slide.title,
-              description: slide.description,
-            })),
-          anchor: block.anchor,
-        };
-      }
-
       const component = block.__component || '';
 
-      if (component === 'shared.rich-text' && block.body) {
+      if (component === 'shared.rich-text' || block.type === 'rich-text') {
+        const body = typeof block.body === 'string' ? block.body : (typeof block.content === 'string' ? block.content : '');
+
+        if (!body) {
+          return null;
+        }
+
         return {
-          type: 'rich-text' as const,
-          content: block.body,
+          __component: 'shared.rich-text' as const,
+          body,
           anchor: block.anchor,
         };
       }
 
-      if (component === 'shared.quote' && block.quote) {
+      if (component === 'shared.quote' || block.type === 'quote') {
+        const title = typeof block.title === 'string' ? block.title : (typeof block.author === 'string' ? block.author : '');
+        const body = typeof block.body === 'string' ? block.body : (typeof block.quote === 'string' ? block.quote : '');
+
+        if (!title && !body) {
+          return null;
+        }
+
         return {
-          type: 'quote' as const,
-          quote: block.quote,
-          author: block.author,
+          __component: 'shared.quote' as const,
+          title,
+          body,
           anchor: block.anchor,
         };
       }
 
-      if (component === 'shared.media' && block.media?.url) {
+      if (component === 'shared.media' || block.type === 'media') {
+        const file = normalizeMediaFile(block.file ?? block.media);
+
+        if (!file) {
+          return null;
+        }
+
         return {
-          type: 'media' as const,
-          url: block.media.url,
-          alt: block.media.alternativeText,
-          caption: block.media.caption,
+          __component: 'shared.media' as const,
+          file,
           anchor: block.anchor,
         };
       }
 
-      if (component === 'shared.slider' && Array.isArray(block.slides)) {
+      if (component === 'shared.slider' || block.type === 'slider') {
+        const files = normalizeMediaFiles(block.files ?? block.slides);
+
+        if (files.length === 0) {
+          return null;
+        }
+
         return {
-          type: 'slider' as const,
-          slides: block.slides
-            .filter((slide) => !!slide.image)
-            .map((slide) => ({
-              image: slide.image as string,
-              title: slide.title,
-              description: slide.description,
-            })),
+          __component: 'shared.slider' as const,
+          files,
           anchor: block.anchor,
         };
       }
@@ -174,7 +215,7 @@ function normalizePageResponse<T extends { blocks?: unknown }>(page: T): T {
 export async function getHomepage(): Promise<Homepage> {
   try {
     const response = await apiRequest<StrapiSingleTypeResponse<Homepage>>(
-      `${CMS_API_ENDPOINTS.HOMEPAGE}?${DEFAULT_POPULATE}`,
+      `${CMS_API_ENDPOINTS.HOMEPAGE}?${PAGE_POPULATE}`,
       { auth: false }
     );
     return normalizeSingleTypeResponse((response.data || {}) as Homepage);
@@ -196,7 +237,7 @@ export async function getPageBySlug(slug: string): Promise<Homepage> {
 
   try {
     const response = await apiRequest<StrapiCollectionResponse<Homepage>>(
-      `${CMS_API_ENDPOINTS.PAGES}?filters[slug][$eq]=${encodeURIComponent(normalizedSlug)}&${DEFAULT_POPULATE}`,
+      `${CMS_API_ENDPOINTS.PAGES}?filters[slug][$eq]=${encodeURIComponent(normalizedSlug)}&${PAGE_POPULATE}`,
       { auth: false }
     );
 

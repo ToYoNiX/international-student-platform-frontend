@@ -10,10 +10,12 @@ import type {
   ChatParticipant,
   ChatMessageListResponse,
   ChatProvider,
+  ChatProviderCurrentUser,
   ChatSendMessagePayload,
 } from './types';
 
 type UnknownRecord = Record<string, unknown>;
+type SenderRole = 'user' | 'admin';
 
 const toIso = (value: unknown): string => {
   if (typeof value === 'string' && value.trim()) {
@@ -36,13 +38,124 @@ const toStringId = (value: unknown): string => {
   return `conv_${Date.now()}`;
 };
 
+const getFirstNumber = (values: unknown[]): number => {
+  for (const value of values) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string' && value.trim()) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  return 0;
+};
+
+const getParticipantFromObject = (value: unknown): ChatParticipant | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const record = value as UnknownRecord;
+  const id = getFirstNumber([record.id, record.userId, record.adminUserId, record.senderId]);
+  if (id <= 0) {
+    return null;
+  }
+
+  const explicitRole = typeof record.role === 'string' ? record.role.toLowerCase() : typeof record.type === 'string' ? record.type.toLowerCase() : '';
+  const role: SenderRole | undefined = explicitRole === 'user' || explicitRole === 'admin' ? explicitRole : undefined;
+  const name = [record.firstname, record.lastname].filter((part) => typeof part === 'string' && part.trim()).join(' ').trim();
+
+  return {
+    id,
+    displayName: name || (role === 'user' ? 'You' : `Admin #${id}`),
+    avatarUrl: typeof record.avatarUrl === 'string' ? record.avatarUrl : null,
+    role,
+  };
+};
+
+const getSenderObject = (raw: UnknownRecord): unknown =>
+  raw.sender ?? raw.author ?? raw.createdBy ?? raw.user ?? raw.admin ?? raw.senderUser ?? raw.senderAdmin;
+
+const inferSenderRole = (raw: UnknownRecord, currentUserId?: number): SenderRole => {
+  const nestedSender = getParticipantFromObject(getSenderObject(raw));
+  if (nestedSender?.role === 'user' || nestedSender?.role === 'admin') {
+    return nestedSender.role;
+  }
+
+  if (nestedSender?.id && currentUserId && nestedSender.id === currentUserId) {
+    return 'user';
+  }
+
+  const explicitType = typeof raw.senderType === 'string' ? raw.senderType.toLowerCase() : '';
+  if (explicitType === 'user' || explicitType === 'admin') {
+    return explicitType;
+  }
+
+  const userSenderId = getFirstNumber([
+    raw.senderFrontendUser,
+    raw.senderFrontendUserId,
+    raw.frontendUserId,
+    raw.frontendUser,
+    raw.senderUserId,
+    raw.userId,
+    raw.senderId,
+  ]);
+
+  if (currentUserId && userSenderId === currentUserId) {
+    return 'user';
+  }
+
+  const adminSenderId = getFirstNumber([
+    raw.senderAdminUserId,
+    raw.senderAdminUser,
+    raw.adminUserId,
+    raw.adminId,
+  ]);
+
+  if (adminSenderId > 0) {
+    return 'admin';
+  }
+
+  if (currentUserId && userSenderId === currentUserId) {
+    return 'user';
+  }
+
+  if (userSenderId > 0 && adminSenderId <= 0) {
+    return 'user';
+  }
+
+  if (adminSenderId > 0) {
+    return 'admin';
+  }
+
+  return currentUserId ? 'user' : 'admin';
+};
+
+const participantFromUser = (currentUser?: ChatProviderCurrentUser): ChatParticipant | null => {
+  if (!currentUser) {
+    return null;
+  }
+
+  return {
+    id: currentUser.id,
+    displayName: currentUser.displayName || 'You',
+    avatarUrl: currentUser.avatarUrl,
+    role: currentUser.role === 'admin' ? 'admin' : 'user',
+  };
+};
+
 const participantFromAdmin = (adminUserId: number): ChatParticipant => ({
   id: adminUserId,
   displayName: adminUserId > 0 ? `Admin #${adminUserId}` : 'Admin',
   avatarUrl: null,
+  role: 'admin',
 });
 
-const mapConversation = (raw: UnknownRecord): ChatConversation => {
+const mapConversation = (raw: UnknownRecord, currentUser?: ChatProviderCurrentUser): ChatConversation => {
   const id = toStringId(raw.id ?? raw.documentId);
   const adminUserId = toNumber(raw.adminUserId, 0);
   const title = typeof raw.title === 'string' && raw.title.trim()
@@ -51,31 +164,48 @@ const mapConversation = (raw: UnknownRecord): ChatConversation => {
       ? `Chat with Admin #${adminUserId}`
       : 'Chat';
   const updatedAt = toIso(raw.lastMessageAt ?? raw.updatedAt ?? raw.createdAt);
+  const participants = [participantFromUser(currentUser), participantFromAdmin(adminUserId)].filter(Boolean) as ChatParticipant[];
 
   return {
     id,
     title,
-    participants: [participantFromAdmin(adminUserId)],
+    participants,
     lastMessage: null,
     unreadCount: toNumber(raw.unreadForUser ?? raw.unreadCount, 0),
     updatedAt,
   };
 };
 
-const mapMessage = (raw: UnknownRecord): ChatMessage => {
-  const senderType = typeof raw.senderType === 'string' ? raw.senderType : 'admin';
-  const senderId = senderType === 'user'
-    ? toNumber(raw.senderFrontendUser, 0)
-    : toNumber(raw.senderAdminUserId, 0);
+const mapMessage = (raw: UnknownRecord, currentUserId?: number, forceUserSender = false): ChatMessage => {
+  const senderRole = forceUserSender ? 'user' : inferSenderRole(raw, currentUserId);
+  const senderId = senderRole === 'user'
+    ? getFirstNumber([
+      raw.senderFrontendUser,
+      raw.senderFrontendUserId,
+      raw.frontendUserId,
+      raw.frontendUser,
+      raw.senderUserId,
+      raw.userId,
+      raw.senderId,
+      currentUserId ?? 0,
+    ])
+    : getFirstNumber([
+      raw.senderAdminUserId,
+      raw.senderAdminUser,
+      raw.adminUserId,
+      raw.adminId,
+    ]);
 
   return {
     id: toStringId(raw.id ?? raw.documentId),
     conversationId: toStringId(raw.conversation ?? raw.conversationId),
+    senderType: senderRole,
     text: typeof raw.body === 'string' ? raw.body : typeof raw.text === 'string' ? raw.text : '',
     sender: {
       id: senderId,
-      displayName: senderType === 'user' ? 'You' : senderId > 0 ? `Admin #${senderId}` : 'Admin',
+      displayName: senderRole === 'user' ? 'You' : senderId > 0 ? `Admin #${senderId}` : 'Admin',
       avatarUrl: null,
+      role: senderRole,
     },
     status: 'sent',
     createdAt: toIso(raw.createdAt),
@@ -93,7 +223,7 @@ const extractArray = <T>(value: unknown): T[] => {
   return [];
 };
 
-export function createApiChatProvider(): ChatProvider {
+export function createApiChatProvider(currentUser?: ChatProviderCurrentUser): ChatProvider {
   return {
     async listConversations(page = 1, pageSize = 20): Promise<ChatConversationListResponse> {
       const response = await apiRequest<unknown>('/api/chat/conversations', {
@@ -104,7 +234,7 @@ export function createApiChatProvider(): ChatProvider {
       });
 
       const rows = extractArray<UnknownRecord>(response);
-      const data = rows.map(mapConversation);
+      const data = rows.map((row) => mapConversation(row, currentUser));
 
       return {
         data,
@@ -159,7 +289,9 @@ export function createApiChatProvider(): ChatProvider {
       const response = await apiRequest<unknown>('/api/chat/conversations/start', {
         method: 'POST',
         body: {
-          adminUserId: payload.participantIds[0],
+          data: {
+            adminUserId: payload.participantIds[0],
+          },
         },
       });
 
@@ -181,7 +313,7 @@ export function createApiChatProvider(): ChatProvider {
       const rows = extractArray<UnknownRecord>(response);
 
       return {
-        data: rows.map(mapMessage),
+        data: rows.map((row) => mapMessage(row, currentUser?.id)),
         meta: {
           nextCursor: null,
         },
@@ -192,8 +324,10 @@ export function createApiChatProvider(): ChatProvider {
       const response = await apiRequest<unknown>(`/api/chat/conversations/${conversationId}/messages`, {
         method: 'POST',
         body: {
-          body: payload.text,
-          clientMessageId: payload.clientMessageId,
+          data: {
+            body: payload.text,
+            clientMessageId: payload.clientMessageId,
+          },
         },
       });
 
@@ -205,7 +339,7 @@ export function createApiChatProvider(): ChatProvider {
         data: mapMessage({
           ...(row || {}),
           conversation: conversationId,
-        }),
+        }, currentUser?.id, true),
       };
     },
 
