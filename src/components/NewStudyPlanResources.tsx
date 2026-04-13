@@ -15,6 +15,11 @@ const trackOrder: StudyTrackKey[] = ['msc', 'phd', 'professional'];
 const undergradSpecialtyOrder: UndergradSpecialtyKey[] = ['cs', 'is', 'ai'];
 const curriculumOrder: CurriculumKey[] = ['old', 'new'];
 
+const studyTrackSpecialtyLabels: Record<StudyTrackSpecialty, string> = {
+  CS: 'Computer Science',
+  IS: 'Information Systems',
+};
+
 function getTrackTitleLabel(trackKey: StudyTrackKey, fallbackLabel: string): string {
   if (trackKey === 'msc') {
     return 'MSc.';
@@ -93,7 +98,7 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
       const parentLabel = getTrackTitleLabel(activeTrack, config.tracks[activeTrack].label);
 
       if (activeSpecialty) {
-        return `Study Plans (${parentLabel} ${activeSpecialty})`;
+        return `Study Plans (${parentLabel} ${studyTrackSpecialtyLabels[activeSpecialty]})`;
       }
 
       return `Study Plans (${parentLabel})`;
@@ -114,7 +119,7 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
     setActiveCurriculum(null);
   };
 
-  const tileButtonBase = 'aspect-square rounded-xl border p-5 text-center transition-colors flex items-center justify-center';
+  const tileButtonBase = 'rounded-2xl border px-6 py-6 text-left transition-colors';
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-10">
@@ -155,6 +160,7 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
           {activeTrack && currentTrack?.type === 'research' &&
             (['CS', 'IS'] as StudyTrackSpecialty[]).map((specialty) => {
               const isActive = activeSpecialty === specialty;
+              const specialtyLabel = studyTrackSpecialtyLabels[specialty];
 
               return (
                 <button
@@ -168,7 +174,7 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
                       : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'
                   }`}
                 >
-                  <p className="text-2xl font-semibold">{specialty}</p>
+                  <p className="text-2xl font-semibold">{specialtyLabel}</p>
                 </button>
               );
             })}

@@ -49,29 +49,29 @@ export const undergradStudyPlanConfig: StudyPlanResourceConfigUnion = {
   title: 'Study Plans (Undergrad)',
   specialties: {
     cs: {
-      label: 'CS',
+      label: 'Computer Science',
       resourcesByCurriculum: {
         old: [
-          { id: 'ug-cs-old-1', title: 'CS - Old Curriculum', url: '/accademics/study-plans/ug-cs-old-level-1.pdf' },
+          { id: 'ug-cs-old-1', title: 'Computer Science - Old Curriculum', url: '/accademics/study-plans/ug-cs-old-level-1.pdf' },
         ],
         new: [
-          { id: 'ug-cs-new-1', title: 'CS - New Curriculum', url: '/accademics/study-plans/ug-cs-new-level-1.pdf' },
+          { id: 'ug-cs-new-1', title: 'Computer Science - New Curriculum', url: '/accademics/study-plans/ug-cs-new-level-1.pdf' },
         ],
       },
     },
     is: {
-      label: 'IS',
+      label: 'Information System',
       resourcesByCurriculum: {
         old: [
-          { id: 'ug-is-old-1', title: 'IS - Old Curriculum', url: '/accademics/study-plans/ug-is-old-level-1.pdf' },
+          { id: 'ug-is-old-1', title: 'Information System - Old Curriculum', url: '/accademics/study-plans/ug-is-old-level-1.pdf' },
         ],
         new: [
-          { id: 'ug-is-new-1', title: 'IS - New Curriculum', url: '/accademics/study-plans/ug-is-new-level-1.pdf' },
+          { id: 'ug-is-new-1', title: 'Information System - New Curriculum', url: '/accademics/study-plans/ug-is-new-level-1.pdf' },
         ],
       },
     },
     ai: {
-      label: 'AI',
+      label: 'Artificial Intelligence',
       resourcesByCurriculum: {
         old: [
           { id: 'ug-ai-old-1', title: 'AI - Old Curriculum', url: '/accademics/study-plans/ug-ai-old-foundation.pdf' },
@@ -93,12 +93,12 @@ export const postgradStudyPlanConfig: StudyPlanResourceConfigUnion = {
       label: 'M. SC',
       resourcesBySpecialty: {
         CS: [
-          { id: 'pg-msc-cs-1', title: 'MSc CS Coursework Structure', url: '/accademics/study-plans/pg-msc-cs-coursework.pdf' },
-          { id: 'pg-msc-cs-2', title: 'MSc CS Thesis Timeline', url: '/accademics/study-plans/pg-msc-cs-thesis-timeline.pdf' },
+          { id: 'pg-msc-cs-1', title: 'MSc Computer Science Coursework Structure', url: '/accademics/study-plans/pg-msc-cs-coursework.pdf' },
+          { id: 'pg-msc-cs-2', title: 'MSc Computer Science Thesis Timeline', url: '/accademics/study-plans/pg-msc-cs-thesis-timeline.pdf' },
         ],
         IS: [
           { id: 'pg-msc-is-1', title: 'MSc IS Coursework Structure', url: '/accademics/study-plans/pg-msc-is-coursework.pdf' },
-          { id: 'pg-msc-is-2', title: 'MSc IS Thesis Timeline', url: '/accademics/study-plans/pg-msc-is-thesis-timeline.pdf' },
+          { id: 'pg-msc-is-2', title: 'MSc Information System Thesis Timeline', url: '/accademics/study-plans/pg-msc-is-thesis-timeline.pdf' },
         ],
       },
     },
@@ -111,8 +111,8 @@ export const postgradStudyPlanConfig: StudyPlanResourceConfigUnion = {
           { id: 'pg-phd-cs-2', title: 'PhD CS Publication Requirements', url: '/accademics/study-plans/pg-phd-cs-publications.pdf' },
         ],
         IS: [
-          { id: 'pg-phd-is-1', title: 'PhD IS Milestones and Qualifier Plan', url: '/accademics/study-plans/pg-phd-is-milestones.pdf' },
-          { id: 'pg-phd-is-2', title: 'PhD IS Publication Requirements', url: '/accademics/study-plans/pg-phd-is-publications.pdf' },
+          { id: 'pg-phd-is-1', title: 'PhD Information System Milestones and Qualifier Plan', url: '/accademics/study-plans/pg-phd-is-milestones.pdf' },
+          { id: 'pg-phd-is-2', title: 'PhD Information System Publication Requirements', url: '/accademics/study-plans/pg-phd-is-publications.pdf' },
         ],
       },
     },
