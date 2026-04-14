@@ -54,10 +54,10 @@ export default function Undergraduate() {
   }, []);
 
   return (
-    <div className="py-24 bg-white min-h-screen">
+    <div className="py-24 bg-white min-h-screen dark:bg-[#070d19]">
       <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-8">Undergraduate Studies</h1>
-        {isLoading ? <div className="animate-pulse text-emerald-600">Loading Plans...</div> : <NewStudyPlanResources config={config} />}
+        <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-8">Undergraduate Studies</h1>
+        {isLoading ? <div className="animate-pulse text-emerald-600 dark:text-emerald-400">Loading Plans...</div> : <NewStudyPlanResources config={config} />}
       </div>
     </div>
   );

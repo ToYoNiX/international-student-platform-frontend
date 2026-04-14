@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface EventCardItem {
   id: string;
   imageUrl: string;
@@ -38,30 +36,30 @@ export function RelatedEventsCarousel({ events, onSeeAllEvents }: RelatedEventsC
         {events.map((item) => (
           <article
             key={item.id}
-            className="group w-full flex flex-col bg-navy-800/40 rounded-2xl border border-navy-700 hover:border-emerald-500/50 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-emerald-500/10"
+            className="group w-full flex flex-col rounded-2xl border border-slate-200 bg-white transition-all duration-300 overflow-hidden shadow-sm hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-navy-700 dark:bg-navy-800/40"
           >
             <a href={item.href || '#'} className="block flex-1 flex flex-col">
               {/* CHANGED: Image height from 280px to 360px */}
-              <div className="relative overflow-hidden bg-navy-800 h-[360px]">
+              <div className="relative overflow-hidden bg-slate-100 h-[360px] dark:bg-navy-800">
                 <img
                   src={item.imageUrl}
                   alt={item.imageAlt || item.title}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
-                <div className="absolute bottom-5 left-5 rounded-xl bg-navy-900/90 backdrop-blur-sm border border-navy-600 px-6 py-4 text-center shadow-2xl">
-                  <p className="text-5xl font-black leading-none text-white">{item.day}</p>
-                  <p className="mt-1 text-base font-bold uppercase tracking-wider text-emerald-400">{item.month}</p>
+                <div className="absolute bottom-5 left-5 rounded-xl border border-slate-200 bg-white/95 px-6 py-4 text-center shadow-2xl backdrop-blur-sm dark:border-navy-600 dark:bg-navy-900/90">
+                  <p className="text-5xl font-black leading-none text-slate-900 dark:text-white">{item.day}</p>
+                  <p className="mt-1 text-base font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{item.month}</p>
                 </div>
               </div>
 
               <div className="p-8 flex-1 flex flex-col">
-                <p className="mb-4 flex items-center gap-2 text-sm font-medium text-emerald-400">
+                <p className="mb-4 flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
                   <ClockIcon className="h-4 w-4" />
                   {item.timeRange}
                 </p>
-                <h3 className="line-clamp-2 text-3xl font-bold text-white mb-4 group-hover:text-emerald-300 transition-colors">{item.title}</h3>
-                <p className="line-clamp-3 text-xl text-slate-400 leading-relaxed flex-1">{item.description}</p>
+                <h3 className="line-clamp-2 mb-4 text-3xl font-bold text-slate-900 transition-colors group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-300">{item.title}</h3>
+                <p className="line-clamp-3 flex-1 text-xl leading-relaxed text-slate-600 dark:text-slate-400">{item.description}</p>
               </div>
             </a>
           </article>
@@ -91,11 +89,11 @@ export function NewsCarousel({ news }: NewsCarouselProps) {
         {news.map((item) => (
           <article
             key={item.id}
-            className="group w-full flex flex-col bg-navy-800/40 rounded-2xl border border-navy-700 hover:border-blue-500/50 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-blue-500/10"
+            className="group w-full flex flex-col rounded-2xl border border-slate-200 bg-white transition-all duration-300 overflow-hidden shadow-sm hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 dark:border-navy-700 dark:bg-navy-800/40"
           >
             <a href={item.href || '#'} className="block flex-1 flex flex-col">
               {/* CHANGED: Image height from 280px to 360px */}
-              <div className="overflow-hidden bg-navy-800 h-[360px]">
+              <div className="overflow-hidden bg-slate-100 h-[360px] dark:bg-navy-800">
                 <img
                   src={item.imageUrl}
                   alt={item.imageAlt || item.title}
@@ -105,10 +103,10 @@ export function NewsCarousel({ news }: NewsCarouselProps) {
 
               <div className="p-8 flex-1 flex flex-col">
                 <div className="mb-5">
-                   <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-sm font-bold uppercase tracking-wider border border-blue-500/30">News</span>
+                   <span className="inline-block rounded-full border border-blue-300 bg-blue-100 px-4 py-1.5 text-sm font-bold uppercase tracking-wider text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/20 dark:text-blue-300">News</span>
                 </div>
-                <h3 className="line-clamp-3 text-3xl font-bold leading-tight text-white mb-4 group-hover:text-blue-300 transition-colors">{item.title}</h3>
-                <p className="line-clamp-3 text-xl text-slate-400 leading-relaxed flex-1">{item.description}</p>
+                <h3 className="line-clamp-3 mb-4 text-3xl font-bold leading-tight text-slate-900 transition-colors group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-300">{item.title}</h3>
+                <p className="line-clamp-3 flex-1 text-xl leading-relaxed text-slate-600 dark:text-slate-400">{item.description}</p>
               </div>
             </a>
           </article>
@@ -120,13 +118,13 @@ export function NewsCarousel({ news }: NewsCarouselProps) {
 
 export default function EventsNewsSection({ events, news, onSeeAllEvents }: { events: EventCardItem[], news: NewsCardItem[], onSeeAllEvents?: () => void }) {
   return (
-    <section className="w-full bg-[#0a111f] py-16">
+    <section className="w-full bg-slate-50 py-16 dark:bg-[#0a111f]">
       <div className="mx-auto w-full max-w-[1600px] px-4 sm:px-8 lg:px-10">
-        <h2 className="text-4xl font-bold text-emerald-400 mb-10">Related Events</h2>
+        <h2 className="mb-10 text-4xl font-bold text-emerald-700 dark:text-emerald-400">Related Events</h2>
         <RelatedEventsCarousel events={events} onSeeAllEvents={onSeeAllEvents} />
         
         <div className="mt-24">
-          <h2 className="text-4xl font-bold text-blue-400 mb-10">Latest News</h2>
+          <h2 className="mb-10 text-4xl font-bold text-blue-700 dark:text-blue-400">Latest News</h2>
           <NewsCarousel news={news} />
         </div>
       </div>

@@ -122,14 +122,14 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
   const tileButtonBase = 'rounded-2xl border px-6 py-6 text-left transition-colors';
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-10">
+    <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-10 dark:border-slate-700 dark:bg-slate-900">
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-3xl font-bold text-slate-900 md:text-3xl">{currentTitle}</h3>
+        <h3 className="text-3xl font-bold text-slate-900 md:text-3xl dark:text-slate-100">{currentTitle}</h3>
         {canGoBack && (
           <button
             type="button"
             onClick={handleGoBack}
-            className="shrink-0 rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-700 hover:bg-slate-100"
+            className="shrink-0 rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             Go Back
           </button>
@@ -150,7 +150,7 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
                     setActiveTrack(trackKey);
                     setActiveSpecialty(null);
                   }}
-                  className={`${tileButtonBase} border-slate-300 bg-white text-slate-700 hover:border-slate-400`}
+                  className={`${tileButtonBase} border-slate-300 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500`}
                 >
                   <p className="text-2xl font-semibold">{track.label}</p>
                 </button>
@@ -170,8 +170,8 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
                   aria-pressed={isActive}
                   className={`${tileButtonBase} ${
                     isActive
-                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                      : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500'
                   }`}
                 >
                   <p className="text-2xl font-semibold">{specialtyLabel}</p>
@@ -195,7 +195,7 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
                     setActiveUndergradSpecialty(specialtyKey);
                     setActiveCurriculum(null);
                   }}
-                  className={`${tileButtonBase} border-slate-300 bg-white text-slate-700 hover:border-slate-400`}
+                  className={`${tileButtonBase} border-slate-300 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500`}
                 >
                   <p className="text-2xl font-semibold">{specialty.label}</p>
                 </button>
@@ -215,8 +215,8 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
                   aria-pressed={isActive}
                   className={`${tileButtonBase} ${
                     isActive
-                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                      : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500'
                   }`}
                 >
                   <p className="text-2xl font-semibold">{label}</p>
@@ -234,14 +234,14 @@ export default function NewStudyPlanResources({ config }: NewStudyPlanResourcesP
               href={resource.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 text-green-700 transition-opacity hover:opacity-80"
+              className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 text-green-700 transition-opacity hover:opacity-80 dark:border-slate-700 dark:bg-slate-800 dark:text-emerald-300"
             >
-              <span className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-red-100 text-red-700">
+              <span className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
                 <PdfIcon className="h-8 w-8" />
               </span>
               <div className="min-w-0">
-                <p className="text-xl font-semibold underline break-words text-slate-900">{resource.title}</p>
-                <p className="text-base text-gray-600">Download PDF resource</p>
+                <p className="text-xl font-semibold underline break-words text-slate-900 dark:text-slate-100">{resource.title}</p>
+                <p className="text-base text-gray-600 dark:text-slate-400">Download PDF resource</p>
               </div>
             </a>
           ))}
