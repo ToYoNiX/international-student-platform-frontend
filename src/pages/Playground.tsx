@@ -211,7 +211,7 @@ export default function Playground() {
               key={item.fileName}
               src={videoSrc(item.fileName)}
               title={item.title}
-              caption={item.caption}
+              description={item.description}
             />
           ))}
         </div>
