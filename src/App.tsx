@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MustHeader } from './components/MustHeader/MustHeader';
@@ -6,11 +6,11 @@ import { Footer } from './components/Footer';
 import { HeroSlider } from './components/HeroSlider';
 import { FloatingSocialBar } from './components/FloatingSocialBar';
 import { ChatPanel } from './components/Chat/ChatPanel';
-import { LinksBar } from './components/LinksBar';
 
 // Pages
 import { Academics } from "./pages/Accademics/Academics";
 import Undergraduate from "./pages/Accademics/homepage/Undergraduate";
+import FormationOfCollegeCouncil from "./pages/Accademics/homepage/FormationOfCollegeCouncil";
 import Postgraduate from "./pages/Accademics/homepage/Postgraduate";
 import Schedules from "./pages/Accademics/homepage/Schedules";
 import Questionnaires from './pages/Questionnaires';
@@ -22,7 +22,7 @@ import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { SubmitRequest } from './pages/SubmitRequest';
 import { MyRequests } from './pages/MyRequests';
-import { RootPage } from './pages/RootHome/RootPage';
+import HomePage from './pages/Home';
 import { CmsPage } from './pages/CmsPage';
 import Playground from './pages/Playground';
 import { NotFound } from './pages/NotFound';
@@ -74,12 +74,13 @@ function AppContent() {
             transition={{ duration: 0.2 }}
             className="min-h-[calc(100vh-140px)]">
             <Routes>
-              <Route path="/" element={<RootPage />} />
-              <Route path="/home" element={<RootPage />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/home" element={<HomePage />} />
               
               {/* --- CUSTOM COLLECTION ROUTES --- */}
               <Route path="/academics" element={<Academics />} />
               <Route path="/undergraduate" element={<Undergraduate />} />
+              <Route path="/formation-of-college-council" element={<FormationOfCollegeCouncil />} />
               <Route path="/postgraduate" element={<Postgraduate />} />
               <Route path="/schedules" element={<Schedules />} />
               <Route path="/news" element={<News />} />
@@ -90,6 +91,7 @@ function AppContent() {
               <Route path="/resources" element={<Resources />} />
               <Route path="/announcements" element={<Announcements />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/contactus" element={<ContactUs />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
